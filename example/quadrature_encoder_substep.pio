@@ -1,0 +1,50 @@
+;
+; Copyright (c) 2023 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0
+.program quadrature_encoder_substep
+.origin 0
+	IN X, 32
+	IN Y, 32
+update_state:
+	OUT ISR, 2
+	IN PINS, 2
+	MOV OSR, ~ISR
+	MOV PC, OSR
+decrement:
+	JMP Y--, decrement_cont
+decrement_cont:
+	SET X, 1
+	MOV X, ::X
+check_fifo:
+.wrap_target
+	JMP X--, check_fifo_cont
+check_fifo_cont:
+	MOV PC, ~STATUS
+increment:
+	MOV Y, ~Y
+	JMP Y--, increment_cont
+increment_cont:
+	MOV Y, ~Y
+	SET X, 0
+	.wrap
+invalid:
+	JMP update_state
+	JMP invalid
+	JMP increment		[0]
+	JMP decrement		[1]
+	JMP check_fifo		[4]
+	JMP decrement		[1]
+	JMP invalid
+	JMP check_fifo		[4]
+	JMP increment		[0]
+	JMP increment		[0]
+	JMP check_fifo		[4]
+	JMP invalid
+	JMP decrement		[1]
+	JMP check_fifo		[4]
+	JMP decrement		[1]
+	JMP increment		[0]
+	JMP update_state	[1]
