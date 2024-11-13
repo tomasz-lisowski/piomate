@@ -1,0 +1,31 @@
+;
+; Copyright (c) 2023 mjcross
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0
+.program onewire
+.side_set 1 pindirs
+PUBLIC reset_bus:
+        set x, 28       side 1  [15]
+loop_a: jmp x-- loop_a  side 1  [15]
+        set x, 8        side 0  [6]
+loop_b: jmp x-- loop_b  side 0  [6]
+        mov isr, pins   side 0
+        push            side 0
+        set x, 24       side 0  [7]
+loop_c: jmp x-- loop_c  side 0  [15]
+.wrap_target
+PUBLIC fetch_bit:
+        out x, 1        side 0
+        jmp !x  send_0  side 1  [5]
+send_1:
+        set x, 2        side 0  [8]
+        in pins, 1      side 0  [4]
+loop_e: jmp x-- loop_e  side 0  [15]
+        jmp fetch_bit   side 0
+send_0:
+        set x, 2        side 1  [5]
+loop_d: jmp x-- loop_d  side 1  [15]
+        in null, 1      side 0  [8]
+.wrap

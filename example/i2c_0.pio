@@ -1,0 +1,33 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0
+.program i2c
+.side_set 1 opt pindirs
+do_nack:
+    jmp y-- entry_point
+    irq wait 0 rel
+do_byte:
+    set x, 7
+bitloop:
+    out pindirs, 1         [7]
+    nop             side 1 [2]
+    wait 1 pin, 1          [4]
+    in pins, 1             [7]
+    jmp x-- bitloop side 0 [7]
+    out pindirs, 1         [7]
+    nop             side 1 [7]
+    wait 1 pin, 1          [7]
+    jmp pin do_nack side 0 [2]
+public entry_point:
+.wrap_target
+    out x, 6
+    out y, 1
+    jmp !x do_byte
+    out null, 32
+do_exec:
+    out exec, 16
+    jmp x-- do_exec
+.wrap

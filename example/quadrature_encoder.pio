@@ -1,0 +1,39 @@
+;
+; Copyright (c) 2023 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0
+.program quadrature_encoder
+.origin 0
+    JMP update
+    JMP decrement
+    JMP increment
+    JMP update
+    JMP increment
+    JMP update
+    JMP update
+    JMP decrement
+    JMP decrement
+    JMP update
+    JMP update
+    JMP increment
+    JMP update
+    JMP increment
+decrement:
+    JMP Y--, update
+.wrap_target
+update:
+    MOV ISR, Y
+    PUSH noblock
+sample_pins:
+    OUT ISR, 2
+    IN PINS, 2
+    MOV OSR, ISR
+    MOV PC, ISR
+increment:
+    MOV Y, ~Y
+    JMP Y--, increment_cont
+increment_cont:
+    MOV Y, ~Y
+.wrap
